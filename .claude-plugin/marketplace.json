@@ -5,6 +5,20 @@
   },
   "plugins": [
     {
+      "name": "development",
+      "description": "开发工程",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/ponytail",
+        "./skills/ponytail-audit",
+        "./skills/ponytail-debt",
+        "./skills/ponytail-gain",
+        "./skills/ponytail-help",
+        "./skills/ponytail-review"
+      ]
+    },
+    {
       "name": "diagramming",
       "description": "图表可视化",
       "source": "./",
@@ -20,7 +34,10 @@
       "strict": false,
       "skills": [
         "./skills/ian-xiaohei-illustrations",
-        "./skills/ip-as-logo"
+        "./skills/ip-as-logo",
+        "./skills/punk-avatar",
+        "./skills/punk-cover",
+        "./skills/punk-ip-video-cover"
       ]
     }
   ]

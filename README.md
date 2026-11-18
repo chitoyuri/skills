@@ -18,11 +18,11 @@ npx skills add chitoyuri/skills --list
 安装指定 Skill：
 
 ```bash
-npx skills add chitoyuri/skills --skill agent-git
+npx skills add chitoyuri/skills --skill ip-as-logo
 ```
 
 默认安装到当前项目；如需安装到用户级目录，追加 `--global`。也可以把
-`agent-git` 替换为 [`SKILLS.md`](SKILLS.md) 中的其他 Skill 名称。
+`ip-as-logo` 替换为 [`SKILLS.md`](SKILLS.md) 中的其他 Skill 名称。
 
 ## 本地开发
 

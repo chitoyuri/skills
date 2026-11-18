@@ -26,6 +26,79 @@
     "submodule": "sources/ip-as-logo-skill",
     "skillPath": "."
   },
+  "ponytail": {
+    "category": "development",
+    "submodule": "sources/ponytail",
+    "skillPath": "skills/ponytail"
+  },
+  "ponytail-review": {
+    "category": "development",
+    "submodule": "sources/ponytail",
+    "skillPath": "skills/ponytail-review"
+  },
+  "ponytail-audit": {
+    "category": "development",
+    "submodule": "sources/ponytail",
+    "skillPath": "skills/ponytail-audit"
+  },
+  "ponytail-debt": {
+    "category": "development",
+    "submodule": "sources/ponytail",
+    "skillPath": "skills/ponytail-debt"
+  },
+  "ponytail-gain": {
+    "category": "development",
+    "submodule": "sources/ponytail",
+    "skillPath": "skills/ponytail-gain"
+  },
+  "ponytail-help": {
+    "category": "development",
+    "submodule": "sources/ponytail",
+    "skillPath": "skills/ponytail-help"
+  },
+  "punk-cover": {
+    "category": "visual-design",
+    "submodule": "sources/punk-skill",
+    "skillPath": "skills/punk-cover",
+    "requirements": [
+      {
+        "title": "Punk 共享风格库",
+        "description": "依赖上游仓库根目录的 styles/，须保持从 Skill 目录通过 ../../styles/ 可访问；当前 update 命令仅复制 Skill 子目录，不会同步该共享风格库。",
+        "url": "https://github.com/adrianpunk/Punk-Posters"
+      },
+      {
+        "title": "图像生成工具",
+        "description": "生成封面图片需要环境提供可用的图像生成工具（如 image_gen）；仅输出提示词时不需要。"
+      }
+    ]
+  },
+  "punk-avatar": {
+    "category": "visual-design",
+    "submodule": "sources/punk-skill",
+    "skillPath": "skills/punk-avatar",
+    "requirements": [
+      {
+        "title": "Punk 共享风格库",
+        "description": "依赖上游仓库根目录的 styles/，须保持从 Skill 目录通过 ../../styles/ 可访问；当前 update 命令仅复制 Skill 子目录，不会同步该共享风格库。",
+        "url": "https://github.com/adrianpunk/Punk-Posters"
+      },
+      {
+        "title": "图像生成工具",
+        "description": "生成头像图片需要环境提供可用的图像生成工具（如 image_gen）；仅输出提示词时不需要。"
+      }
+    ]
+  },
+  "punk-ip-video-cover": {
+    "category": "visual-design",
+    "submodule": "sources/punk-skill",
+    "skillPath": "skills/punk-ip-video-cover",
+    "requirements": [
+      {
+        "title": "内置图像工具",
+        "description": "生成视频封面需要环境提供可用的内置图像工具，并以用户提供的人物照片作为身份参考；仅输出方案或提示词时不需要图像生成工具。"
+      }
+    ]
+  },
   "ian-xiaohei-illustrations": {
     "category": "visual-design",
     "submodule": "sources/ian-xiaohei-illustrations",

@@ -8,3 +8,9 @@
 [submodule "sources/ian-xiaohei-illustrations"]
 	path = sources/ian-xiaohei-illustrations
 	url = https://github.com/helloianneo/ian-xiaohei-illustrations.git
+[submodule "sources/ponytail"]
+	path = sources/ponytail
+	url = https://github.com/DietrichGebert/ponytail.git
+[submodule "sources/punk-skill"]
+	path = sources/punk-skill
+	url = https://github.com/adrianpunk/Punk-Posters.git
