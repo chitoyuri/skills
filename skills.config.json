@@ -1,0 +1,41 @@
+{
+  "drawio-skill": {
+    "category": "diagramming",
+    "submodule": "sources/drawio-skill",
+    "skillPath": "skills/drawio-skill",
+    "requirements": [
+      {
+        "title": "draw.io CLI",
+        "description": "导出 PNG、SVG、PDF 或 JPG 时需要安装 draw.io 桌面版并确保 CLI 可调用。",
+        "url": "https://github.com/jgraph/drawio-desktop/releases"
+      },
+      {
+        "title": "Graphviz（可选）",
+        "description": "仅在使用自动布局功能时需要。",
+        "url": "https://graphviz.org/download/"
+      },
+      {
+        "title": "Python 3",
+        "description": "运行结构校验、PNG 修复、自动布局和浏览器回退等随附脚本时需要。",
+        "url": "https://www.python.org/downloads/"
+      }
+    ]
+  },
+  "ip-as-logo": {
+    "category": "visual-design",
+    "submodule": "sources/ip-as-logo-skill",
+    "skillPath": "."
+  },
+  "ian-xiaohei-illustrations": {
+    "category": "visual-design",
+    "submodule": "sources/ian-xiaohei-illustrations",
+    "skillPath": "ian-xiaohei-illustrations",
+    "requirements": [
+      {
+        "title": "内置 image_gen 图像工具",
+        "description": "生成或编辑配图时需要环境提供内置 image_gen 工具；仅输出配图策略时无需生图工具。",
+        "url": "https://github.com/helloianneo/ian-xiaohei-illustrations"
+      }
+    ]
+  }
+}

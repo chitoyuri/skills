@@ -1,0 +1,10 @@
+# 使用 `git submodule add <repository-url> sources/<project-name>` 添加 Skill 来源。
+[submodule "sources/drawio-skill"]
+	path = sources/drawio-skill
+	url = https://github.com/Agents365-ai/drawio-skill.git
+[submodule "sources/ip-as-logo-skill"]
+	path = sources/ip-as-logo-skill
+	url = https://github.com/s1dashu/ip-as-logo-skill
+[submodule "sources/ian-xiaohei-illustrations"]
+	path = sources/ian-xiaohei-illustrations
+	url = https://github.com/helloianneo/ian-xiaohei-illustrations.git

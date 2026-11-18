@@ -1,0 +1,27 @@
+{
+  "name": "chitoyuri-skills",
+  "owner": {
+    "name": "chitoyuri"
+  },
+  "plugins": [
+    {
+      "name": "diagramming",
+      "description": "图表可视化",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/drawio-skill"
+      ]
+    },
+    {
+      "name": "visual-design",
+      "description": "视觉创作",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/ian-xiaohei-illustrations",
+        "./skills/ip-as-logo"
+      ]
+    }
+  ]
+}
