@@ -1,0 +1,9 @@
+{
+  "name": "skills",
+  "compatibility_date": "2026-11-19",
+  "assets": {
+    "directory": "./site/dist",
+    "html_handling": "force-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+}
