@@ -43,12 +43,16 @@ describe("update-skills", () => {
     const config = { alpha: {}, beta: {} };
     expect(parseArgs([], config)).toEqual({
       help: false,
-      skillNames: ["alpha", "beta"],
+      all: false,
+      skillNames: [],
     });
     expect(parseArgs(["alpha", "alpha"], config)).toEqual({
       help: false,
+      all: false,
       skillNames: ["alpha"],
     });
+    expect(parseArgs(["--", "--all"], config)).toMatchObject({ all: true });
+    expect(() => parseArgs(["--all", "alpha"], config)).toThrow(/--all/);
     expect(parseArgs(["--help"], config).help).toBe(true);
     expect(parseArgs(["-h"], config).help).toBe(true);
     expect(() => parseArgs(["--wat"], config)).toThrow("不支持的参数：--wat");
@@ -56,6 +60,9 @@ describe("update-skills", () => {
     expect(() => parseArgs(["-u"], config)).toThrow("不支持的参数：-u");
     expect(() => parseArgs(["missing"], config)).toThrow(
       "没有找到 Skill 配置：missing",
+    );
+    expect(() => parseArgs(["constructor"], config)).toThrow(
+      "没有找到 Skill 配置：constructor",
     );
   });
 
@@ -194,7 +201,7 @@ describe("update-skills", () => {
     await main(["--help"], { config, logger, update });
     expect(logger.log).toHaveBeenCalledTimes(3);
     expect(logger.log).toHaveBeenCalledWith(
-      "用法：pnpm run update [-- <skill-name>...]",
+      expect.stringMatching(/用法.*pnpm run update.*--all/),
     );
     expect(update).not.toHaveBeenCalled();
 
@@ -210,15 +217,104 @@ describe("update-skills", () => {
       gamma: { requirements: [] },
     };
 
-    await main([], { config, logger, update });
+    await main(["--all"], { config, logger, update });
     expect(update).toHaveBeenCalledTimes(1);
     expect(update).toHaveBeenCalledWith("alpha", config.alpha);
+
+    await main(["gamma"], { config, logger, update });
     expect(logger.log).toHaveBeenCalledWith(
       "gamma 由仓库内维护，没有可更新的子模块来源，已跳过。",
     );
-
-    await main(["gamma"], { config, logger, update });
     expect(update).toHaveBeenCalledTimes(1);
+  });
+
+  it("offers an initially empty external Skill menu and updates only checked entries", async () => {
+    const config = {
+      alpha: { submodule: "sources/shared", skillPath: "skills/alpha" },
+      beta: { submodule: "sources/shared", skillPath: "skills/beta" },
+      local: { category: "development" },
+    };
+    const update = vi.fn();
+    const prompts = {
+      multiselect: vi.fn().mockResolvedValue(["beta"]),
+      isCancel: () => false,
+    };
+    await main([], { config, update, prompts, interactive: true, logger: { log: vi.fn() } });
+    expect(prompts.multiselect).toHaveBeenCalledOnce();
+    const menu = prompts.multiselect.mock.calls[0][0];
+    expect(menu.initialValues).toEqual([]);
+    expect(menu.required).toBe(true);
+    expect(menu.options).toEqual([
+      expect.objectContaining({ value: "alpha", hint: "sources/shared" }),
+      expect.objectContaining({ value: "beta", hint: "sources/shared" }),
+    ]);
+    expect(update).toHaveBeenCalledExactlyOnceWith("beta", config.beta);
+  });
+
+  it("does not fetch or publish anything when the selection is cancelled", async () => {
+    const cancelled = Symbol("cancelled");
+    const update = vi.fn();
+    const runGitCommand = vi.fn();
+    const prompts = {
+      multiselect: vi.fn().mockResolvedValue(cancelled),
+      isCancel: value => value === cancelled,
+    };
+    await expect(main([], {
+      config: { alpha: { submodule: "sources/a", skillPath: "." } },
+      prompts, interactive: true, update, runGitCommand, logger: { log: vi.fn() },
+    })).rejects.toThrow(/已取消更新/);
+    expect(update).not.toHaveBeenCalled();
+    expect(runGitCommand).not.toHaveBeenCalled();
+  });
+
+  it("rejects an empty selection without starting an update", async () => {
+    const update = vi.fn();
+    const prompts = { multiselect: vi.fn().mockResolvedValue([]), isCancel: () => false };
+    await expect(main([], {
+      config: { alpha: { submodule: "sources/a" } },
+      interactive: true, prompts, update, logger: { log: vi.fn() },
+    })).rejects.toThrow(/至少选择一个 Skill/);
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it("requires explicit names or --all without an interactive terminal", async () => {
+    const update = vi.fn();
+    const runGitCommand = vi.fn();
+    const prompts = { multiselect: vi.fn() };
+    await expect(main([], {
+      config: { alpha: { submodule: "sources/a" } },
+      interactive: false, update, runGitCommand, prompts, logger: { log: vi.fn() },
+    })).rejects.toThrow(/--all/);
+    expect(prompts.multiselect).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
+    expect(runGitCommand).not.toHaveBeenCalled();
+  });
+
+  it.each([{}, { local: { category: "development" } }])("finishes without prompting when no external Skills are configured: %j", async (config) => {
+    const update = vi.fn();
+    const logger = { log: vi.fn() };
+    const prompts = { multiselect: vi.fn() };
+    await main([], { config, interactive: true, prompts, update, logger });
+    expect(prompts.multiselect).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
+    expect(logger.log).toHaveBeenCalledWith(expect.stringMatching(/外部 Skill/));
+  });
+
+  it("bypasses menus for --all and explicit names even in an interactive terminal", async () => {
+    const config = {
+      alpha: { submodule: "sources/a" },
+      beta: { submodule: "sources/b" },
+      local: { category: "development" },
+    };
+    const update = vi.fn();
+    const logger = { log: vi.fn() };
+    const prompts = { multiselect: vi.fn() };
+    await main(["--", "--all"], { config, interactive: true, prompts, update, logger });
+    expect(update.mock.calls.map(([name]) => name)).toEqual(["alpha", "beta"]);
+    update.mockClear();
+    await main(["beta", "beta"], { config, interactive: true, prompts, update, logger });
+    expect(update).toHaveBeenCalledExactlyOnceWith("beta", config.beta);
+    expect(prompts.multiselect).not.toHaveBeenCalled();
   });
 
   it("updates only the selected skill with pnpm's forwarded argument separator", async () => {
@@ -305,6 +401,60 @@ describe("update-skills", () => {
       expect(git(repoRoot, ["rev-parse", "HEAD"])).toBe(recordedCommit);
       expect(git(repoRoot, ["ls-files", "--stage", "sources/alpha"])).toBe(recordedPointer);
       expect(git(repoRoot, ["diff", "--name-only"])).toContain("sources/alpha");
+    } finally {
+      assertInside(os.tmpdir(), fixtureRoot, "测试清理路径");
+      await rm(fixtureRoot, { recursive: true, force: true });
+    }
+  }, 15000);
+
+  it("fetches a shared source once per invocation and publishes only selected Skills", async () => {
+    const fixtureRoot = await mkdtemp(path.join(os.tmpdir(), "skills-update-shared-test-"));
+    const upstreamRoot = path.join(fixtureRoot, "upstream");
+    const repoRoot = path.join(fixtureRoot, "consumer");
+    const names = ["alpha", "beta", "gamma"];
+    const config = Object.fromEntries(names.map(name => [name, {
+      submodule: "sources/shared", skillPath: `skills/${name}`,
+    }]));
+
+    try {
+      await mkdir(upstreamRoot);
+      await mkdir(repoRoot);
+      git(upstreamRoot, ["init", "-b", "main"]);
+      for (const name of names) {
+        await mkdir(path.join(upstreamRoot, "skills", name), { recursive: true });
+        await writeFile(path.join(upstreamRoot, "skills", name, "SKILL.md"), `${name} A\n`);
+      }
+      commitFixture(upstreamRoot);
+      git(repoRoot, ["init", "-b", "main"]);
+      git(repoRoot, ["submodule", "add", "-b", "main", upstreamRoot, "sources/shared"]);
+      for (const name of names) {
+        await mkdir(path.join(repoRoot, "skills", name), { recursive: true });
+        await writeFile(path.join(repoRoot, "skills", name, "SKILL.md"), `${name} A\n`);
+      }
+      commitFixture(repoRoot);
+      for (const name of names) {
+        await writeFile(path.join(upstreamRoot, "skills", name, "SKILL.md"), `${name} B\n`);
+      }
+      commitFixture(upstreamRoot);
+      const latestCommit = git(upstreamRoot, ["rev-parse", "HEAD"]);
+      const runGitCommand = vi.fn(args => git(repoRoot, args));
+      const options = { repoRoot, config, runGitCommand, logger: { log: vi.fn() } };
+      await main(["alpha", "beta"], options);
+
+      expect(runGitCommand.mock.calls.filter(([args]) => args.includes("--remote"))).toHaveLength(1);
+      expect(git(path.join(repoRoot, "sources", "shared"), ["rev-parse", "HEAD"])).toBe(latestCommit);
+      for (const name of ["alpha", "beta"]) {
+        expect((await readFile(path.join(repoRoot, "skills", name, "SKILL.md"), "utf8")).trim()).toBe(`${name} B`);
+      }
+      expect((await readFile(path.join(repoRoot, "skills", "gamma", "SKILL.md"), "utf8")).trim()).toBe("gamma A");
+
+      await writeFile(path.join(upstreamRoot, "skills", "beta", "SKILL.md"), "beta C\n");
+      commitFixture(upstreamRoot);
+      await main(["beta"], options);
+      expect(runGitCommand.mock.calls.filter(([args]) => args.includes("--remote"))).toHaveLength(2);
+      expect((await readFile(path.join(repoRoot, "skills", "beta", "SKILL.md"), "utf8")).trim()).toBe("beta C");
+      expect((await readFile(path.join(repoRoot, "skills", "alpha", "SKILL.md"), "utf8")).trim()).toBe("alpha B");
+      expect((await readFile(path.join(repoRoot, "skills", "gamma", "SKILL.md"), "utf8")).trim()).toBe("gamma A");
     } finally {
       assertInside(os.tmpdir(), fixtureRoot, "测试清理路径");
       await rm(fixtureRoot, { recursive: true, force: true });

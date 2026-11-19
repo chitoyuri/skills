@@ -41,7 +41,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: 更新外部 Skills
-        run: pnpm run update
+        run: pnpm run update -- --all
 
       - name: 校验 Skills
         run: pnpm run check

@@ -27,7 +27,8 @@
 - 子模块中的 Skill 需要同步到 `skills/` 后再从本仓库发布。
 - 同步外部 Skill 时保持上游目录和 frontmatter 原样，不做格式清洗或字段删减。
 - 外部 Skill 的子模块和源路径统一登记在 `skills.config.json`。
-- 对外部 Skill，统一运行 `pnpm run update -- <skill-name>` 获取上游最新版本并同步发布内容，不直接修改生成内容。
+- 对外部 Skill，统一使用 `pnpm run update` 交互选择，或运行 `pnpm run update -- <skill-name>...` 指定更新，获取上游最新版本并同步发布内容，不直接修改生成内容。
+- `update` 的交互列表默认不勾选；非交互环境必须指定 Skill 名称或使用 `pnpm run update -- --all` 全量更新。同一次运行中，每个来源只拉取一次，再同步选中的 Skill。
 
 ## Git 提交
 

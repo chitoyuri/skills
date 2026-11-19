@@ -163,15 +163,26 @@ pnpm run check
 添加或更新外部 Skill 后，统一使用 `update` 获取上游最新版本并复制到发布目录：
 
 ```bash
-# 更新全部外部 Skills
+# 交互选择要更新的外部 Skill
 pnpm run update
 
-# 只更新指定 Skill
-pnpm run update -- <skill-name>
+# 直接更新指定 Skill，可传入多个名称
+pnpm run update -- <skill-name> [<skill-name>...]
+
+# 直接更新全部外部 Skills
+pnpm run update -- --all
 ```
+
+无参数时，命令在交互终端中显示已登记来源的外部 Skill 列表，默认不勾选。
+使用空格勾选，至少选择一项后回车开始更新；按 `Ctrl+C` 可取消，选择完成前
+不会执行 Git 操作。指定名称或 `--all` 时直接更新，不显示选择菜单。
+CI 等非交互环境必须传入名称或 `--all`，无参数调用会提示用法并退出。
 
 命令会初始化对应子模块，并更新到其远程跟踪分支的最新提交；分支由 `.gitmodules`
 或本地 Git 配置指定，未指定时使用远程默认分支。仓库内维护的 Skill 会自动跳过。
+同一次运行中，每个来源只拉取一次，再同步选中的 Skill，完成后汇总更新数量。
+多个 Skill 共用来源时，更新其中一个也会移动共享子模块的提交指针，发布目录
+只同步选中的 Skill。
 
 更新完成后，需要同时提交子模块指针和对应的 `skills/<skill-name>/` 发布内容；
 命令不会自动执行 Git 提交。

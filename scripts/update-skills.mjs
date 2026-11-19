@@ -5,6 +5,8 @@ import { cp, mkdir, readFile, rm, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import * as defaultPrompts from "@clack/prompts";
+
 const scriptPath = fileURLToPath(import.meta.url);
 const scriptDir = path.dirname(scriptPath);
 const defaultRepoRoot = path.resolve(scriptDir, "..");
@@ -75,7 +77,7 @@ export function buildSubmoduleArgs(repoRoot, submodule) {
 
 export function parseArgs(args, config) {
   const commandArgs = args[0] === "--" ? args.slice(1) : args;
-  const allowedOptions = new Set(["--help", "-h"]);
+  const allowedOptions = new Set(["--help", "-h", "--all"]);
   const unknownOption = commandArgs.find(
     (arg) => arg.startsWith("-") && !allowedOptions.has(arg),
   );
@@ -84,17 +86,19 @@ export function parseArgs(args, config) {
   }
 
   const help = commandArgs.includes("--help") || commandArgs.includes("-h");
-  const requestedNames = [
+  const all = commandArgs.includes("--all");
+  const skillNames = [
     ...new Set(commandArgs.filter((arg) => !arg.startsWith("-"))),
   ];
-  const skillNames =
-    requestedNames.length > 0 ? requestedNames : Object.keys(config);
-  const unknownSkill = skillNames.find((skillName) => !config[skillName]);
+  if (all && skillNames.length > 0) {
+    throw new Error("--all 不能与指定的 Skill 名称同时使用。");
+  }
+  const unknownSkill = skillNames.find((skillName) => !Object.hasOwn(config, skillName));
   if (unknownSkill) {
     throw new Error(`没有找到 Skill 配置：${unknownSkill}`);
   }
 
-  return { help, skillNames };
+  return { help, all, skillNames };
 }
 
 export async function updateSkill(skillName, config, options = {}) {
@@ -119,9 +123,13 @@ export async function updateSkill(skillName, config, options = {}) {
     allowEqual: false,
   });
 
-  runGitCommand(buildSubmoduleArgs(repoRoot, config.submodule), {
-    stdio: "inherit",
-  });
+  const updatedSubmodules = options.updatedSubmodules ?? new Set();
+  if (!updatedSubmodules.has(submodulePath)) {
+    runGitCommand(buildSubmoduleArgs(repoRoot, config.submodule), {
+      stdio: "inherit",
+    });
+    updatedSubmodules.add(submodulePath);
+  }
   await ensureSkillExists(sourcePath, skillName);
 
   await removePath(destinationPath, { recursive: true, force: true });
@@ -152,16 +160,41 @@ export async function main(args = process.argv.slice(2), options = {}) {
     );
   const logger = options.logger ?? console;
   const parsed = parseArgs(args, config);
+  const externalNames = Object.keys(config).filter(name => config[name].submodule);
 
   if (parsed.help) {
-    logger.log("用法：pnpm run update [-- <skill-name>...]");
-    logger.log(`可用 Skill：${Object.keys(config).join(", ")}`);
+    logger.log("用法：pnpm run update [-- <skill-name>... | -- --all]");
+    logger.log(`可更新 Skill：${externalNames.join(", ")}`);
     logger.log(
-      "不指定 Skill 时更新全部外部 Skills；先获取上游最新版本，再同步到发布目录。",
+      "无参数时交互选择；指定名称或 --all 直接更新。非交互环境必须指定名称或 --all。",
     );
     return;
   }
 
+  let skillNames = parsed.all ? externalNames : parsed.skillNames;
+  if (!parsed.all && skillNames.length === 0) {
+    const interactive = options.interactive ?? Boolean(process.stdin.isTTY && process.stdout.isTTY);
+    if (!interactive) {
+      throw new Error("非交互环境请指定 Skill 名称，或使用 pnpm run update -- --all 更新全部外部 Skills。");
+    }
+    if (externalNames.length === 0) {
+      logger.log("没有可更新的外部 Skill。");
+      return;
+    }
+    const prompts = options.prompts ?? defaultPrompts;
+    skillNames = await prompts.multiselect({
+      message: "选择要更新的 Skill（空格勾选，回车开始）：",
+      options: externalNames.map(name => ({ value: name, label: name, hint: config[name].submodule })),
+      initialValues: [],
+      required: true,
+    });
+    if (prompts.isCancel(skillNames)) {
+      throw new Error("已取消更新，尚未执行 Git 操作。");
+    }
+    if (skillNames.length === 0) throw new Error("请至少选择一个 Skill。");
+  }
+
+  const updatedSubmodules = new Set();
   const update =
     options.update ??
     ((skillName, skillConfig) =>
@@ -169,15 +202,19 @@ export async function main(args = process.argv.slice(2), options = {}) {
         ...options,
         repoRoot,
         logger,
+        updatedSubmodules,
       }));
-  for (const skillName of parsed.skillNames) {
+  let updatedCount = 0;
+  for (const skillName of skillNames) {
     const skillConfig = config[skillName];
     if (!skillConfig.submodule) {
       logger.log(`${skillName} 由仓库内维护，没有可更新的子模块来源，已跳过。`);
       continue;
     }
     await update(skillName, skillConfig);
+    updatedCount++;
   }
+  logger.log(updatedCount > 0 ? `已完成 ${updatedCount} 个 Skill 的更新。` : "没有可更新的外部 Skill。");
 }
 
 export function isDirectExecution(argvPath = process.argv[1]) {
