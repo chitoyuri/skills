@@ -82,22 +82,50 @@ description: 简洁说明该 Skill 在什么情况下使用。
 
 ### 添加外部 Skill
 
-先把来源项目添加为子模块：
+运行交互式命令，一次完成添加来源和登记配置：
 
 ```bash
-pnpm run sources:add -- <repository-url> sources/<project-name>
+pnpm run sources:add
 ```
 
-然后在 `skills.config.json` 中登记子模块路径和 Skill 在来源项目中的路径：
+按提示输入仓库 URL 和项目名称。项目名称默认从 URL 推导，回车即可接受，来源
+保存到 `sources/<project-name>`。子模块添加成功后，命令自动查找 Git 已跟踪的
+`SKILL.md`：只有一个 Skill 时自动选中，多个时通过勾选列表选择，默认全选。
+随后为本次新增的 Skill 统一选择分类，默认“其他”，并自动写入
+`skills.config.json` 中的名称、子模块路径、Skill 相对路径和分类。
 
-```json
-{
-  "example-skill": {
-    "submodule": "sources/example-project",
-    "skillPath": "path/to/example-skill",
-    "category": "development"
-  }
-}
+同一来源包含同名 Skill 的多个版本时，优先使用已登记的路径，其次使用
+`skills/<name>`；仍无法确定来源目录时提示重名冲突。
+
+也可以通过参数提供已知信息，其余选项仍由交互提示补充：
+
+```bash
+# 输入项目名称及后续选项
+pnpm run sources:add -- <repository-url>
+
+# 指定来源目录，也可将第二个参数写为 <project-name>
+pnpm run sources:add -- <repository-url> sources/<project-name>
+
+# 无交互登记全部 Skill，并指定分类
+pnpm run sources:add -- <repository-url> sources/<project-name> --all --category development
+
+# 无交互登记指定 Skill，--skill 可重复使用
+pnpm run sources:add -- <repository-url> sources/<project-name> --skill example-skill --category development
+```
+
+非交互环境中必须提供 URL，省略项目名称时从 URL 推导，省略分类时使用“其他”；
+发现多个 Skill 时必须通过 `--all` 或 `--skill` 指定选择。
+
+已有子模块且来源 URL 一致时，重复运行会重新扫描并补充登记。已登记且来源相同
+的条目会保留原有分类和运行要求；同名但来源不同则提示冲突。中途取消注册会
+保留已添加的子模块，可以使用相同命令重试。
+
+登记完成后，运行以下命令同步到发布目录、生成分组清单并校验：
+
+```bash
+pnpm run update -- <skill-name>
+pnpm run groups:generate
+pnpm run check
 ```
 
 不要直接修改由外部来源同步生成的 `skills/<skill-name>/`；同步时保持上游目录和

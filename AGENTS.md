@@ -20,7 +20,9 @@
 
 ## 子模块
 
-- 使用 `pnpm run sources:add -- <url> sources/<project-name>` 添加来源。
+- 使用 `pnpm run sources:add` 交互输入仓库 URL、项目名称、Skill 选择和分类；添加子模块成功后自动登记到 `skills.config.json`。
+- 也可使用 `pnpm run sources:add -- <url> sources/<project-name>`；非交互调用用 `--all` 或可重复的 `--skill <name>` 选择 Skill，分类通过 `--category <id>` 指定，默认 `other`。
+- 重复运行会复用来源 URL 一致的子模块并补充登记，保留已有配置；同名但来源不同的 Skill 必须先解决冲突。
 - 不直接修改 `sources/` 中属于子模块的内容；修改应在对应项目仓库完成。
 - 子模块中的 Skill 需要同步到 `skills/` 后再从本仓库发布。
 - 同步外部 Skill 时保持上游目录和 frontmatter 原样，不做格式清洗或字段删减。
