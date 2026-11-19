@@ -110,5 +110,120 @@
         "url": "https://github.com/helloianneo/ian-xiaohei-illustrations"
       }
     ]
+  },
+  "antfu": {
+    "submodule": "sources/antfu-skills",
+    "skillPath": "skills/antfu",
+    "category": "development"
+  },
+  "antfu-create-pr": {
+    "submodule": "sources/antfu-skills",
+    "skillPath": "skills/antfu-create-pr",
+    "category": "development"
+  },
+  "antfu-issue-triage": {
+    "submodule": "sources/antfu-skills",
+    "skillPath": "skills/antfu-issue-triage",
+    "category": "development"
+  },
+  "antfu-query": {
+    "submodule": "sources/antfu-skills",
+    "skillPath": "skills/antfu-query",
+    "category": "development"
+  },
+  "antfu-simplify": {
+    "submodule": "sources/antfu-skills",
+    "skillPath": "skills/antfu-simplify",
+    "category": "development"
+  },
+  "nitro": {
+    "submodule": "sources/antfu-skills",
+    "skillPath": "skills/nitro",
+    "category": "development"
+  },
+  "nuxt": {
+    "submodule": "sources/antfu-skills",
+    "skillPath": "skills/nuxt",
+    "category": "development"
+  },
+  "pinia": {
+    "submodule": "sources/antfu-skills",
+    "skillPath": "skills/pinia",
+    "category": "development"
+  },
+  "pnpm": {
+    "submodule": "sources/antfu-skills",
+    "skillPath": "skills/pnpm",
+    "category": "development"
+  },
+  "unocss": {
+    "submodule": "sources/antfu-skills",
+    "skillPath": "skills/unocss",
+    "category": "development"
+  },
+  "vite": {
+    "submodule": "sources/antfu-skills",
+    "skillPath": "skills/vite",
+    "category": "development"
+  },
+  "vitepress": {
+    "submodule": "sources/antfu-skills",
+    "skillPath": "skills/vitepress",
+    "category": "development"
+  },
+  "vitest": {
+    "submodule": "sources/antfu-skills",
+    "skillPath": "skills/vitest",
+    "category": "development"
+  },
+  "vue": {
+    "submodule": "sources/antfu-skills",
+    "skillPath": "skills/vue",
+    "category": "development"
+  },
+  "deploy-to-vercel": {
+    "submodule": "sources/vercel-agent-skills",
+    "skillPath": "skills/deploy-to-vercel",
+    "category": "development"
+  },
+  "vercel-cli-with-tokens": {
+    "submodule": "sources/vercel-agent-skills",
+    "skillPath": "skills/vercel-cli-with-tokens",
+    "category": "development"
+  },
+  "vercel-composition-patterns": {
+    "submodule": "sources/vercel-agent-skills",
+    "skillPath": "skills/composition-patterns",
+    "category": "development"
+  },
+  "vercel-optimize": {
+    "submodule": "sources/vercel-agent-skills",
+    "skillPath": "skills/vercel-optimize",
+    "category": "development"
+  },
+  "vercel-react-best-practices": {
+    "submodule": "sources/vercel-agent-skills",
+    "skillPath": "skills/react-best-practices",
+    "category": "development"
+  },
+  "vercel-react-native-skills": {
+    "submodule": "sources/vercel-agent-skills",
+    "skillPath": "skills/react-native-skills",
+    "category": "development"
+  },
+  "vercel-react-view-transitions": {
+    "submodule": "sources/vercel-agent-skills",
+    "skillPath": "skills/react-view-transitions",
+    "category": "development"
+  },
+  "web-design-guidelines": {
+    "submodule": "sources/vercel-agent-skills",
+    "skillPath": "skills/web-design-guidelines",
+    "category": "development"
+  },
+  "writing-guidelines": {
+    "submodule": "sources/vercel-agent-skills",
+    "skillPath": "skills/writing-guidelines",
+    "category": "development"
   }
 }
