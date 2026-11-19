@@ -37,7 +37,7 @@ pnpm install
 如果克隆时没有初始化子模块，可稍后执行：
 
 ```bash
-pnpm run sources:init
+git submodule update --init --recursive
 ```
 
 ### 目录结构

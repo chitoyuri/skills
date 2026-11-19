@@ -20,7 +20,6 @@
     "groups:generate": "node scripts/generate-skill-groups.mjs",
     "groups:check": "node scripts/generate-skill-groups.mjs --check",
     "sources:add": "node scripts/add-source.mjs",
-    "sources:init": "git submodule update --init --recursive",
     "update": "node scripts/update-skills.mjs",
     "site:prepare": "node scripts/build-site-assets.mjs",
     "site:dev": "pnpm run site:prepare && astro dev --root site --host",
