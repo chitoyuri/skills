@@ -463,7 +463,8 @@ describe("update-skills", () => {
 
   it("wraps git success, non-zero status and process errors", () => {
     expect(runGit(["--version"])).toMatch(/^git version/);
-    expect(() => runGit(["definitely-not-a-command"])).toThrow(
+    // Invalid global options avoid external-command lookup and spelling suggestions on Windows.
+    expect(() => runGit(["--definitely-not-an-option"])).toThrow(
       "Git 命令执行失败",
     );
     expect(() => runGit(["--version"], { repoRoot: "\0invalid" })).toThrow();

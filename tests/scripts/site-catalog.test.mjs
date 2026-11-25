@@ -107,8 +107,9 @@ describe('site-catalog helpers', () => {
 
   it('wraps git success, allowed failures and hard failures', () => {
     expect(runGit(['--version'])).toMatch(/^git version/);
-    expect(runGit(['definitely-not-a-command'], { allowFailure: true })).toBe('');
-    expect(() => runGit(['definitely-not-a-command'])).toThrow('Git 命令执行失败');
+    // Invalid global options avoid external-command lookup and spelling suggestions on Windows.
+    expect(runGit(['--definitely-not-an-option'], { allowFailure: true })).toBe('');
+    expect(() => runGit(['--definitely-not-an-option'])).toThrow('Git 命令执行失败');
     expect(runGit(['--version'], { repoRoot: '\0invalid', allowFailure: true })).toBe('');
   });
 
