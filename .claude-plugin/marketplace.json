@@ -62,6 +62,15 @@
         "./skills/punk-cover",
         "./skills/punk-ip-video-cover"
       ]
+    },
+    {
+      "name": "other",
+      "description": "其他",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/lieflat-less-ai-tone"
+      ]
     }
   ]
 }

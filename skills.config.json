@@ -225,5 +225,10 @@
     "submodule": "sources/vercel-agent-skills",
     "skillPath": "skills/writing-guidelines",
     "category": "development"
+  },
+  "lieflat-less-ai-tone": {
+    "submodule": "sources/lieflat-less-ai-tone",
+    "skillPath": ".",
+    "category": "other"
   }
 }

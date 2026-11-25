@@ -20,3 +20,6 @@
 [submodule "sources/vercel-agent-skills"]
 	path = sources/vercel-agent-skills
 	url = https://github.com/vercel-labs/agent-skills
+[submodule "sources/lieflat-less-ai-tone"]
+	path = sources/lieflat-less-ai-tone
+	url = https://github.com/larashero3-dotcom/lieflat-less-ai-tone
