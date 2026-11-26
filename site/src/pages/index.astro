@@ -135,6 +135,8 @@ const latestUpdate = skills
   </main>
 
   <script>
+    import { splitSearchMatches } from '../lib/search-highlight';
+
     type SearchEntry = {
       name: string;
       category: string;
@@ -175,6 +177,18 @@ const latestUpdate = skills
 
     function normalized(value: string) {
       return value.toLocaleLowerCase('zh-CN');
+    }
+
+    function appendHighlighted(parent: HTMLElement, value: string, terms: string[]) {
+      for (const part of splitSearchMatches(value, terms)) {
+        if (!part.matched) {
+          parent.append(part.text);
+          continue;
+        }
+        const mark = document.createElement('mark');
+        mark.textContent = part.text;
+        parent.append(mark);
+      }
     }
 
     function updateCollectionSections() {
@@ -233,7 +247,7 @@ const latestUpdate = skills
       link.href = `${base}skills/${encodeURIComponent(entry.name)}/`;
       const summary = document.createElement('div');
       const name = document.createElement('strong');
-      name.textContent = entry.name;
+      appendHighlighted(name, entry.name, terms);
       const identity = document.createElement('div');
       identity.className = 'skill-identity';
       const category = document.createElement('span');
@@ -248,10 +262,10 @@ const latestUpdate = skills
       if (collection) identity.append(collection);
       identity.append(category);
       const description = document.createElement('p');
-      description.textContent = entry.description;
+      appendHighlighted(description, entry.description, terms);
       const snippet = document.createElement('div');
       snippet.className = 'snippet';
-      snippet.textContent = excerpt(entry, terms);
+      appendHighlighted(snippet, excerpt(entry, terms), terms);
       summary.append(identity, description);
       link.append(summary, snippet);
       item.append(link);
