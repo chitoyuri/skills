@@ -29,6 +29,7 @@
 - 外部 Skill 的子模块和源路径统一登记在 `skills.config.json`。
 - 对外部 Skill，统一使用 `pnpm run update` 交互选择，或运行 `pnpm run update -- <skill-name>...` 指定更新，获取上游最新版本并同步发布内容，不直接修改生成内容。
 - `update` 的交互列表默认不勾选；非交互环境必须指定 Skill 名称或使用 `pnpm run update -- --all` 全量更新。同一次运行中，每个来源只拉取一次，再同步选中的 Skill。
+- 站点系列默认按 `skills.config.json` 中的 `submodule` 自动分组；可设置 `collection` 指定系列名，或设为 `false` 让单个 Skill 独立展示。仅有一个 Skill 的来源默认仍作为独立项展示。
 
 ## Git 提交
 

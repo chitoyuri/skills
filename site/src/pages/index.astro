@@ -7,6 +7,32 @@ import { countSkillCategories } from '../../../scripts/skill-categories.mjs';
 
 const skills = await loadCatalog();
 const categories = countSkillCategories(skills);
+type CatalogSkill = (typeof skills)[number];
+type SkillGroup = {
+  id: string;
+  label: string;
+  skills: { skill: CatalogSkill; index: number }[];
+};
+const groupsById = new Map<string, SkillGroup>();
+const standaloneSkills = [];
+for (const [index, skill] of skills.entries()) {
+  const entry = { skill, index };
+  if (!skill.collectionId) {
+    standaloneSkills.push(entry);
+    continue;
+  }
+  const group: SkillGroup = groupsById.get(skill.collectionId) ?? {
+    id: skill.collectionId,
+    label: skill.collectionLabel,
+    skills: [],
+  };
+  group.skills.push(entry);
+  groupsById.set(skill.collectionId, group);
+}
+const skillGroups = [...groupsById.values()].sort((a, b) => a.label.localeCompare(b.label));
+if (standaloneSkills.length > 0) {
+  skillGroups.push({ id: 'standalone', label: '单项 Skills', skills: standaloneSkills });
+}
 const latestUpdate = skills
   .map(skill => skill.updatedAt)
   .filter(Boolean)
@@ -65,23 +91,33 @@ const latestUpdate = skills
             <th scope="col">Updated</th>
           </tr>
         </thead>
-        <tbody data-skill-rows>
-          {skills.map((skill, index) => (
-            <tr class="skill-row" data-name={skill.name} data-category={skill.category} data-updated={skill.updatedAt ?? ''}>
-              <td class="row-index">{String(index + 1).padStart(2, '0')}</td>
-              <td>
-                <a class="skill-link" href={skillHref(skill.name)}>
-                  <span class="skill-identity">
-                    <span class="skill-name">{skill.name}</span>
-                    <span class="category-label">{skill.categoryLabel}</span>
-                  </span>
-                  <span class="skill-description">{skill.description}</span>
-                </a>
-              </td>
-              <td class="updated-cell">{formatDate(skill.updatedAt)}</td>
+        {skillGroups.map(group => (
+          <tbody data-collection-section data-collection-id={group.id}>
+            <tr class="collection-heading">
+              <th scope="rowgroup" colspan="3">
+                <div class="collection-heading-content">
+                  <span>{group.label}</span>
+                  <span class="collection-count"><span data-visible-count>{group.skills.length}</span> SKILLS</span>
+                </div>
+              </th>
             </tr>
-          ))}
-        </tbody>
+            {group.skills.map(({ skill, index }) => (
+              <tr class="skill-row" data-name={skill.name} data-category={skill.category} data-updated={skill.updatedAt ?? ''}>
+                <td class="row-index">{String(index + 1).padStart(2, '0')}</td>
+                <td>
+                  <a class="skill-link" href={skillHref(skill.name)}>
+                    <span class="skill-identity">
+                      <span class="skill-name">{skill.name}</span>
+                      <span class="category-label">{skill.categoryLabel}</span>
+                    </span>
+                    <span class="skill-description">{skill.description}</span>
+                  </a>
+                </td>
+                <td class="updated-cell">{formatDate(skill.updatedAt)}</td>
+              </tr>
+            ))}
+          </tbody>
+        ))}
       </table>
 
       <ul class="search-results" data-search-results aria-live="polite"></ul>
@@ -94,6 +130,7 @@ const latestUpdate = skills
       name: string;
       category: string;
       categoryLabel: string;
+      collectionLabel: string | null;
       description: string;
       updatedAt: string | null;
       source: string;
@@ -104,13 +141,13 @@ const latestUpdate = skills
     const catalog = document.querySelector<HTMLElement>('[data-catalog]');
     const input = catalog?.querySelector<HTMLInputElement>('[data-search-input]');
     const table = catalog?.querySelector<HTMLElement>('[data-skill-table]');
-    const rowsRoot = catalog?.querySelector<HTMLElement>('[data-skill-rows]');
     const resultsRoot = catalog?.querySelector<HTMLUListElement>('[data-search-results]');
     const emptyState = catalog?.querySelector<HTMLElement>('[data-empty-state]');
     const matchCount = catalog?.querySelector<HTMLElement>('[data-match-count]');
     const categoryButtons = [...(catalog?.querySelectorAll<HTMLButtonElement>('[data-category-filter]') ?? [])];
     const sortButtons = [...(catalog?.querySelectorAll<HTMLButtonElement>('[data-sort]') ?? [])];
-    const rows = [...(rowsRoot?.querySelectorAll<HTMLTableRowElement>('[data-name]') ?? [])];
+    const collectionSections = [...(table?.querySelectorAll<HTMLTableSectionElement>('[data-collection-section]') ?? [])];
+    const rows = collectionSections.flatMap(section => [...section.querySelectorAll<HTMLTableRowElement>('[data-name]')]);
     const base = catalog?.dataset.base ?? '/';
     let indexPromise: Promise<SearchEntry[]> | null = null;
     let selectedCategory = 'all';
@@ -129,6 +166,16 @@ const latestUpdate = skills
 
     function normalized(value: string) {
       return value.toLocaleLowerCase('zh-CN');
+    }
+
+    function updateCollectionSections() {
+      for (const section of collectionSections) {
+        const visibleRows = [...section.querySelectorAll<HTMLTableRowElement>('[data-name]')]
+          .filter(row => !row.hidden);
+        section.hidden = visibleRows.length === 0;
+        const count = section.querySelector<HTMLElement>('[data-visible-count]');
+        if (count) count.textContent = String(visibleRows.length);
+      }
     }
 
     function score(entry: SearchEntry, terms: string[]) {
@@ -174,7 +221,14 @@ const latestUpdate = skills
       const category = document.createElement('span');
       category.className = 'category-label';
       category.textContent = entry.categoryLabel;
-      identity.append(name, category);
+      const collection = entry.collectionLabel ? document.createElement('span') : null;
+      if (collection) {
+        collection.className = 'collection-label';
+        collection.textContent = entry.collectionLabel;
+      }
+      identity.append(name);
+      if (collection) identity.append(collection);
+      identity.append(category);
       const description = document.createElement('p');
       description.textContent = entry.description;
       const snippet = document.createElement('div');
@@ -201,6 +255,7 @@ const latestUpdate = skills
           row.hidden = category !== 'all' && row.dataset.category !== category;
           if (!row.hidden) count += 1;
         }
+        updateCollectionSections();
         table.hidden = false;
         emptyState.hidden = count > 0;
         if (matchCount) matchCount.textContent = String(count);
@@ -255,10 +310,12 @@ const latestUpdate = skills
       button.addEventListener('click', () => {
         const sort = button.dataset.sort;
         for (const candidate of sortButtons) candidate.setAttribute('aria-pressed', String(candidate === button));
-        const sorted = [...rows].sort((a, b) => sort === 'updated'
-          ? (b.dataset.updated ?? '').localeCompare(a.dataset.updated ?? '') || (a.dataset.name ?? '').localeCompare(b.dataset.name ?? '')
-          : (a.dataset.name ?? '').localeCompare(b.dataset.name ?? ''));
-        rowsRoot?.append(...sorted);
+        for (const section of collectionSections) {
+          const sorted = [...section.querySelectorAll<HTMLTableRowElement>('[data-name]')].sort((a, b) => sort === 'updated'
+            ? (b.dataset.updated ?? '').localeCompare(a.dataset.updated ?? '') || (a.dataset.name ?? '').localeCompare(b.dataset.name ?? '')
+            : (a.dataset.name ?? '').localeCompare(b.dataset.name ?? ''));
+          section.append(...sorted);
+        }
       });
     }
   </script>

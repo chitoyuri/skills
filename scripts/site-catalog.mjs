@@ -141,6 +141,26 @@ export function simpleMetadata(frontmatter) {
     .map(([key, value]) => ({ key, value }));
 }
 
+export function getSkillCollection(skillName, config = {}) {
+  if (config.collection === false) {
+    return null;
+  }
+  if (config.collection !== undefined) {
+    if (typeof config.collection !== 'string' || !config.collection.trim()) {
+      throw new Error(`${skillName} 的 collection 无效：请使用非空名称或 false。`);
+    }
+    const label = config.collection.trim();
+    return { id: `collection:${label}`, label };
+  }
+
+  const submodule = config.submodule?.replaceAll('\\', '/');
+  if (!submodule) {
+    return null;
+  }
+  const label = path.posix.basename(submodule).replace(/-(?:agent-)?skills?$/i, '');
+  return { id: `source:${submodule}`, label };
+}
+
 export function assertInside(parentPath, childPath, label) {
   const relativePath = path.relative(parentPath, childPath);
   if (relativePath === '..' || relativePath.startsWith(`..${path.sep}`) || path.isAbsolute(relativePath)) {
@@ -245,6 +265,8 @@ export async function loadCatalog(options = {}) {
 
     const skillConfig = config[skillName] ?? {};
     const category = getSkillCategory(skillName, skillConfig);
+    const collection = getSkillCollection(skillName, skillConfig);
+    if (collection) searchableParts.push(collection.label);
     searchableParts.push(category.id, category.label);
     const skillDependencies = skillConfig.skillDependencies ?? [];
     for (const dependency of skillDependencies) {
@@ -292,6 +314,8 @@ export async function loadCatalog(options = {}) {
       name: skillName,
       category: category.id,
       categoryLabel: category.label,
+      collectionId: collection?.id ?? null,
+      collectionLabel: collection?.label ?? null,
       description: parsed.data.description.trim(),
       frontmatter: parsed.data,
       metadata: simpleMetadata(parsed.data),
@@ -305,6 +329,19 @@ export async function loadCatalog(options = {}) {
       upstream,
       searchText: searchableParts.join('\n'),
     });
+  }
+
+  const collectionCounts = new Map();
+  for (const skill of skills) {
+    if (skill.collectionId) {
+      collectionCounts.set(skill.collectionId, (collectionCounts.get(skill.collectionId) ?? 0) + 1);
+    }
+  }
+  for (const skill of skills) {
+    if (skill.collectionId && collectionCounts.get(skill.collectionId) === 1) {
+      skill.collectionId = null;
+      skill.collectionLabel = null;
+    }
   }
 
   return skills;

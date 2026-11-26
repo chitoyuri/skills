@@ -427,6 +427,31 @@ pre {
   border-bottom: 1px solid var(--border);
 }
 
+.collection-heading th {
+  height: auto;
+  padding: 24px 0 10px;
+  border-top: 1px solid var(--border-strong);
+  text-align: left;
+}
+
+.collection-heading-content {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.collection-heading-content > span:first-child {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.collection-count {
+  color: var(--muted);
+  font-family: var(--font-maple);
+  font-size: 10px;
+}
+
 .skill-row:hover {
   background: #0a0a0a;
 }
@@ -477,7 +502,14 @@ pre {
   white-space: nowrap;
 }
 
+.collection-label {
+  color: var(--foreground);
+  font-size: 10px;
+  font-weight: 500;
+}
+
 .skill-table[hidden],
+.skill-table tbody[hidden],
 .skill-row[hidden] {
   display: none;
 }
@@ -984,7 +1016,8 @@ pre {
   .skill-table,
   .skill-table tbody,
   .skill-table tr,
-  .skill-table td {
+  .skill-table td,
+  .skill-table th {
     display: block;
     width: 100%;
     height: auto;

@@ -11,6 +11,7 @@ import {
   classifyFile,
   directoryPermalink,
   findRepositoryRoot,
+  getSkillCollection,
   loadCatalog,
   parseGitmodules,
   readTextForSearch,
@@ -169,6 +170,20 @@ describe('site-catalog helpers', () => {
       .toEqual([{ key: 'flag', value: false }, { key: 'count', value: 0 }]);
   });
 
+  it('derives collection names from sources and accepts explicit grouping overrides', () => {
+    expect(getSkillCollection('alpha', { submodule: 'sources/ponytail' })).toEqual({
+      id: 'source:sources/ponytail',
+      label: 'ponytail',
+    });
+    expect(getSkillCollection('alpha', { collection: 'Ponytail' })).toEqual({
+      id: 'collection:Ponytail',
+      label: 'Ponytail',
+    });
+    expect(getSkillCollection('alpha', { collection: false })).toBeNull();
+    expect(getSkillCollection('alpha')).toBeNull();
+    expect(() => getSkillCollection('alpha', { collection: '' })).toThrow(/alpha.*collection.*非空名称/);
+  });
+
   it('filters deleted tracked files and reads only searchable text', async () => {
     const files = await readTrackedSkillFiles('/repo', () => 'skills/a/SKILL.md\0skills/deleted/SKILL.md\0', file => {
       return file.endsWith(path.join('a', 'SKILL.md'));
@@ -217,6 +232,50 @@ describe('loadCatalog', () => {
     expect(catalog[0].searchText).toContain('开发工程');
     expect(catalog[1]).toMatchObject({ category: 'other', categoryLabel: '其他' });
     expect(catalog[0].updatedAt).toMatch(/^\d{4}-/);
+  });
+
+  it('groups shared sources automatically, allows named overrides and leaves single items standalone', async () => {
+    const gitmodules = [
+      '[submodule "shared"]',
+      '  path = sources/shared',
+      '  url = https://github.com/example/shared.git',
+      '[submodule "solo"]',
+      '  path = sources/solo',
+      '  url = https://github.com/example/solo.git',
+    ].join('\n');
+    const fixture = await createMockFixture({
+      files: Object.fromEntries(['alpha', 'beta', 'gamma', 'delta', 'epsilon'].map(name => [
+        `skills/${name}/SKILL.md`,
+        `---\nname: ${name}\ndescription: ${name}\n---\n`,
+      ])),
+      config: {
+        alpha: { submodule: 'sources/shared', skillPath: '.' },
+        beta: { submodule: 'sources/shared', skillPath: '.' },
+        gamma: { submodule: 'sources/solo', skillPath: '.' },
+        delta: { collection: 'Editorial' },
+        epsilon: { collection: 'Editorial' },
+      },
+      gitmodules,
+      gitResponses: {
+        tree: '160000 commit pinned123\tsources/shared',
+        worktreeCommit: 'checked456',
+      },
+    });
+
+    const catalog = await loadCatalog({ repoRoot: fixture.root, runGitCommand: fixture.runGitCommand });
+    expect(catalog.find(skill => skill.name === 'alpha')).toMatchObject({
+      collectionId: 'source:sources/shared',
+      collectionLabel: 'shared',
+    });
+    expect(catalog.find(skill => skill.name === 'gamma')).toMatchObject({
+      collectionId: null,
+      collectionLabel: null,
+    });
+    expect(catalog.find(skill => skill.name === 'delta')).toMatchObject({
+      collectionId: 'collection:Editorial',
+      collectionLabel: 'Editorial',
+    });
+    expect(catalog.find(skill => skill.name === 'delta').searchText).toContain('Editorial');
   });
 
   it('rejects an unknown category with a configuration hint', async () => {

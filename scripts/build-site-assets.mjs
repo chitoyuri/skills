@@ -46,6 +46,7 @@ export function buildSearchIndexEntry(skill) {
     name: skill.name,
     category: skill.category,
     categoryLabel: skill.categoryLabel,
+    collectionLabel: skill.collectionLabel ?? null,
     description: skill.description,
     updatedAt: skill.updatedAt,
     source: skill.upstream?.repositoryUrl ?? skill.publishedSourceUrl,
