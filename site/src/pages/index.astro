@@ -78,11 +78,6 @@ const latestUpdate = skills
         ))}
       </div>
 
-      <div class="sort-tabs" aria-label="排序方式">
-        <button type="button" data-sort="name" aria-pressed="true">名称</button>
-        <button type="button" data-sort="updated" aria-pressed="false">最近更新</button>
-      </div>
-
       <table class="skill-table" data-skill-table>
         <thead>
           <tr>
@@ -111,7 +106,7 @@ const latestUpdate = skills
               </th>
             </tr>
             {group.skills.map(({ skill, index }) => (
-              <tr class="skill-row" data-name={skill.name} data-category={skill.category} data-updated={skill.updatedAt ?? ''}>
+              <tr class="skill-row" data-name={skill.name} data-category={skill.category}>
                 <td class="row-index">{String(index + 1).padStart(2, '0')}</td>
                 <td>
                   <a class="skill-link" href={skillHref(skill.name)}>
@@ -156,7 +151,6 @@ const latestUpdate = skills
     const emptyState = catalog?.querySelector<HTMLElement>('[data-empty-state]');
     const matchCount = catalog?.querySelector<HTMLElement>('[data-match-count]');
     const categoryButtons = [...(catalog?.querySelectorAll<HTMLButtonElement>('[data-category-filter]') ?? [])];
-    const sortButtons = [...(catalog?.querySelectorAll<HTMLButtonElement>('[data-sort]') ?? [])];
     const collectionSections = [...(table?.querySelectorAll<HTMLTableSectionElement>('[data-collection-section]') ?? [])];
     const rows = collectionSections.flatMap(section => [...section.querySelectorAll<HTMLTableRowElement>('[data-name]')]);
     const base = catalog?.dataset.base ?? '/';
@@ -277,7 +271,6 @@ const latestUpdate = skills
       const revision = ++searchRevision;
       const category = selectedCategory;
       const terms = normalized(input.value).trim().split(/\s+/).filter(Boolean);
-      for (const button of sortButtons) button.disabled = terms.length > 0;
       resultsRoot.classList.remove('is-visible');
       resultsRoot.replaceChildren();
       emptyState.textContent = '没有找到匹配的 Skill。';
@@ -338,17 +331,5 @@ const latestUpdate = skills
       }
     });
 
-    for (const button of sortButtons) {
-      button.addEventListener('click', () => {
-        const sort = button.dataset.sort;
-        for (const candidate of sortButtons) candidate.setAttribute('aria-pressed', String(candidate === button));
-        for (const section of collectionSections) {
-          const sorted = [...section.querySelectorAll<HTMLTableRowElement>('[data-name]')].sort((a, b) => sort === 'updated'
-            ? (b.dataset.updated ?? '').localeCompare(a.dataset.updated ?? '') || (a.dataset.name ?? '').localeCompare(b.dataset.name ?? '')
-            : (a.dataset.name ?? '').localeCompare(b.dataset.name ?? ''));
-          section.append(...sorted);
-        }
-      });
-    }
   </script>
 </BaseLayout>
