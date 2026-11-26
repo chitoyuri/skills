@@ -91,14 +91,23 @@ const latestUpdate = skills
             <th scope="col">Updated</th>
           </tr>
         </thead>
-        {skillGroups.map(group => (
-          <tbody data-collection-section data-collection-id={group.id}>
+        {skillGroups.map((group, groupIndex) => (
+          <tbody id={`collection-section-${groupIndex}`} class="collection-section" data-collection-section data-collection-id={group.id}>
             <tr class="collection-heading">
               <th scope="rowgroup" colspan="3">
-                <div class="collection-heading-content">
+                <button
+                  type="button"
+                  class="collection-heading-content collection-toggle"
+                  data-collection-toggle
+                  aria-expanded="true"
+                  aria-controls={`collection-section-${groupIndex}`}
+                >
                   <span>{group.label}</span>
-                  <span class="collection-count"><span data-visible-count>{group.skills.length}</span> SKILLS</span>
-                </div>
+                  <span class="collection-heading-meta">
+                    <span class="collection-count"><span data-visible-count>{group.skills.length}</span> SKILLS</span>
+                    <i class="ph ph-caret-down" aria-hidden="true"></i>
+                  </span>
+                </button>
               </th>
             </tr>
             {group.skills.map(({ skill, index }) => (
@@ -176,6 +185,15 @@ const latestUpdate = skills
         const count = section.querySelector<HTMLElement>('[data-visible-count]');
         if (count) count.textContent = String(visibleRows.length);
       }
+    }
+
+    for (const section of collectionSections) {
+      const toggle = section.querySelector<HTMLButtonElement>('[data-collection-toggle]');
+      toggle?.addEventListener('click', () => {
+        const expanded = toggle.getAttribute('aria-expanded') === 'true';
+        toggle.setAttribute('aria-expanded', String(!expanded));
+        section.classList.toggle('is-collapsed', expanded);
+      });
     }
 
     function score(entry: SearchEntry, terms: string[]) {

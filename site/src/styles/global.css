@@ -435,15 +435,48 @@ pre {
 }
 
 .collection-heading-content {
+  width: 100%;
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 16px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
 .collection-heading-content > span:first-child {
   font-size: 15px;
   font-weight: 600;
+}
+
+.collection-heading-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.collection-heading-meta > i {
+  color: var(--muted);
+  font-size: 14px;
+  transition: transform 140ms ease;
+}
+
+.collection-toggle[aria-expanded="false"] > .collection-heading-meta > i {
+  transform: rotate(-90deg);
+}
+
+.collection-toggle:focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 4px;
+}
+
+.collection-section.is-collapsed .skill-row {
+  display: none;
 }
 
 .collection-count {
