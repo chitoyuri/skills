@@ -270,15 +270,27 @@ pre {
 .catalog-header {
   margin-bottom: 18px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  gap: 8px 24px;
+}
+
+.catalog-header .table-heading {
+  margin: 0;
 }
 
 .catalog-count {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
   color: var(--muted);
   font-family: var(--font-maple);
   font-size: 12px;
+}
+
+.catalog-count > span {
+  white-space: nowrap;
 }
 
 .search-box {
@@ -369,13 +381,13 @@ pre {
   text-align: left;
 }
 
-.skill-table th:first-child,
-.skill-table td:first-child {
+.skill-table thead th:first-child,
+.skill-table .row-index {
   width: 48px;
 }
 
-.skill-table th:last-child,
-.skill-table td:last-child {
+.skill-table thead th:last-child,
+.skill-table .updated-cell {
   width: 120px;
   text-align: right;
 }
@@ -398,7 +410,7 @@ pre {
 .collection-heading-content {
   width: 100%;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
   padding: 0;
@@ -411,12 +423,15 @@ pre {
 }
 
 .collection-heading-content > span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-size: 15px;
   font-weight: 600;
 }
 
 .collection-heading-meta {
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   gap: 8px;
 }
@@ -444,6 +459,7 @@ pre {
   color: var(--muted);
   font-family: var(--font-maple);
   font-size: 10px;
+  white-space: nowrap;
 }
 
 .skill-row:hover {
@@ -510,6 +526,7 @@ pre {
 
 .skill-description {
   overflow: hidden;
+  overflow-wrap: anywhere;
   color: var(--muted);
   font-size: 13px;
   text-overflow: ellipsis;
@@ -529,6 +546,7 @@ pre {
 
 .search-result {
   border-bottom: 1px solid var(--border);
+  overflow-wrap: anywhere;
 }
 
 .search-result a {
@@ -1014,6 +1032,10 @@ pre {
     display: none;
   }
 
+  .skill-table {
+    margin-top: 16px;
+  }
+
   .skill-table,
   .skill-table tbody,
   .skill-table tr,
@@ -1022,6 +1044,16 @@ pre {
     display: block;
     width: 100%;
     height: auto;
+  }
+
+  .collection-heading th {
+    padding: 0;
+  }
+
+  .collection-heading-content {
+    min-height: 56px;
+    gap: 12px;
+    padding-block: 12px;
   }
 
   .skill-link {
@@ -1192,7 +1224,16 @@ pre {
   }
 
   .catalog-header {
-    align-items: flex-end;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .search-box input {
+    font-size: 16px;
+  }
+
+  .category-filters button {
+    min-height: 44px;
   }
 
   .shortcut {

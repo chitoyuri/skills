@@ -59,7 +59,10 @@ const latestUpdate = skills
     <section class="catalog-section" aria-labelledby="catalog-title" data-catalog data-base={import.meta.env.BASE_URL}>
       <div class="catalog-header">
         <h2 class="table-heading" id="catalog-title">Skills Directory</h2>
-        <span class="catalog-count"><span data-match-count aria-live="polite">{skills.length}</span> / {skills.length} SKILLS · UPDATED {formatDate(latestUpdate)}</span>
+        <div class="catalog-count">
+          <span><span data-match-count aria-live="polite">{skills.length}</span> / {skills.length} SKILLS</span>
+          <span>UPDATED {formatDate(latestUpdate)}</span>
+        </div>
       </div>
 
       <label class="search-box">
