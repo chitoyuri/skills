@@ -1178,10 +1178,6 @@ pre {
     gap: 14px;
   }
 
-  .site-header nav a:first-child {
-    display: none;
-  }
-
   .site-footer {
     margin-top: 64px;
     flex-direction: column;
