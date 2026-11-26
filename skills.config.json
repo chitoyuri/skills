@@ -230,5 +230,10 @@
     "submodule": "sources/lieflat-less-ai-tone",
     "skillPath": ".",
     "category": "other"
+  },
+  "design-taste-frontend": {
+    "submodule": "sources/taste-skill",
+    "skillPath": "skills/taste-skill",
+    "category": "other"
   }
 }

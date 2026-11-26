@@ -69,6 +69,7 @@
       "source": "./",
       "strict": false,
       "skills": [
+        "./skills/design-taste-frontend",
         "./skills/lieflat-less-ai-tone"
       ]
     }
